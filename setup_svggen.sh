@@ -1,0 +1,121 @@
+#!/bin/bash
+set -e
+
+ENV_NAME="svggen"
+PYTHON_VERSION="3.11"
+
+echo "=== Setting up environment for SVG Glyph Generation ==="
+
+# ---------------------------------------------------------------------------
+# 1. Install uv if not already available
+# ---------------------------------------------------------------------------
+if ! command -v uv &>/dev/null; then
+    echo ">>> Installing uv"
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+    export PATH="$HOME/.local/bin:$PATH"
+fi
+
+# ---------------------------------------------------------------------------
+# 2. Create and activate a conda environment
+# ---------------------------------------------------------------------------
+echo ">>> Creating conda environment '${ENV_NAME}' with Python ${PYTHON_VERSION}"
+conda create -y -n "${ENV_NAME}" python="${PYTHON_VERSION}"
+eval "$(conda shell.bash hook)"
+conda activate "${ENV_NAME}"
+
+# ---------------------------------------------------------------------------
+# 3. Install PyTorch (CUDA 12.6 – adjust the index-url for your CUDA version)
+#    See https://pytorch.org/get-started/locally/ for other variants.
+# ---------------------------------------------------------------------------
+echo ">>> Installing PyTorch (CUDA 12.6)"
+uv pip install torch torchvision --index-url https://download.pytorch.org/whl/cu126
+
+# ---------------------------------------------------------------------------
+# 4. Install transformers from source (Qwen3-VL support requires >= 4.57.0)
+# ---------------------------------------------------------------------------
+echo ">>> Installing transformers from source"
+uv pip install git+https://github.com/huggingface/transformers
+
+# ---------------------------------------------------------------------------
+# 5. Install Qwen3-VL and core ML dependencies
+# ---------------------------------------------------------------------------
+echo ">>> Installing Qwen3-VL and core ML packages"
+uv pip install \
+    accelerate \
+    qwen-vl-utils \
+    pillow \
+    requests \
+    sentencepiece \
+    protobuf==6.31.1
+
+# ---------------------------------------------------------------------------
+# 6. Install VecGlypher dependencies
+# ---------------------------------------------------------------------------
+echo ">>> Installing VecGlypher dependencies"
+uv pip install \
+    blackrenderer==0.6.0 \
+    cairosvg==2.8.2 \
+    click==8.2.1 \
+    tqdm==4.67.1 \
+    ipython==8.37.0 \
+    wordfreq==3.1.1 \
+    pandas==2.3.1 \
+    streamlit==1.47.0 \
+    skia-python==138.0 \
+    svgpathtools==1.7.1 \
+    hydra-core==1.3.2 \
+    seaborn==0.13.2 \
+    matplotlib==3.10.5 \
+    lxml==6.0.1 \
+    tensorboardX==2.6.4 \
+    opencv-python-headless==4.11.0.86 \
+    svg-path==7.0 \
+    orjson==3.11.3
+
+# ---------------------------------------------------------------------------
+# 7. Install LLamaFactory + vLLM (for training & inference)
+# ---------------------------------------------------------------------------
+echo ">>> Installing LLamaFactory and vLLM"
+uv pip install 'llamafactory[torch,metrics,deepspeed,vllm]==0.9.3' vllm==0.8.5.post1
+uv pip install --no-cache-dir flash-attn==2.7.2.post1 --no-build-isolation
+
+# ---------------------------------------------------------------------------
+# 8. Install evaluation dependencies
+# ---------------------------------------------------------------------------
+echo ">>> Installing evaluation packages"
+uv pip install torchmetrics==1.8.1 openai-clip==1.0.1 lpips==0.1.4
+
+# ---------------------------------------------------------------------------
+# 9. Quick sanity check
+# ---------------------------------------------------------------------------
+echo ""
+echo ">>> Verifying installation..."
+python - <<'PYEOF'
+import torch, transformers, accelerate
+print(f"  torch        : {torch.__version__}  (CUDA: {torch.cuda.is_available()})")
+print(f"  transformers : {transformers.__version__}")
+print(f"  accelerate   : {accelerate.__version__}")
+
+try:
+    import svgpathtools, cairosvg, lxml
+    print(f"  svgpathtools : {svgpathtools.__version__}")
+    print(f"  cairosvg     : {cairosvg.__version__}")
+    print("  VecGlypher deps: OK")
+except ImportError as e:
+    print(f"  WARNING: missing VecGlypher dep: {e}")
+
+print()
+print("Environment is ready. Example usage:")
+print()
+print('  from transformers import Qwen3VLForConditionalGeneration, AutoProcessor')
+print()
+print('  model = Qwen3VLForConditionalGeneration.from_pretrained(')
+print('      "Qwen/Qwen3-VL-8B-Thinking",')
+print('      torch_dtype=torch.bfloat16,')
+print('      device_map="auto",')
+print('  )')
+print('  processor = AutoProcessor.from_pretrained("Qwen/Qwen3-VL-8B-Thinking")')
+PYEOF
+
+echo ""
+echo "=== Done! Activate with: conda activate ${ENV_NAME} ==="

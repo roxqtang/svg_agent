@@ -1,0 +1,3 @@
+[submodule "VecGlypher"]
+	path = VecGlypher
+	url = https://github.com/xk-huang/VecGlypher.git
