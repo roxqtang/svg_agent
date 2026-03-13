@@ -1,6 +1,5 @@
-[submodule "VecGlypher"]
-	path = VecGlypher
-	url = https://github.com/xk-huang/VecGlypher.git
 [submodule "Qwen-Agent"]
 	path = Qwen-Agent
 	url = https://github.com/QwenLM/Qwen-Agent.git
+[submodule "star-vector"]
+	path = star-vector

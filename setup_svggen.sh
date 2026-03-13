@@ -2,7 +2,7 @@
 set -e
 
 ENV_NAME="svggen"
-PYTHON_VERSION="3.11"
+PYTHON_VERSION="3.12"
 
 echo "=== Setting up environment for SVG Glyph Generation ==="
 
