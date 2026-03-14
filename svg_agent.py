@@ -88,7 +88,19 @@ MESSAGES = [
 ]
 
 def main():
-    main_model = _load_main_model()
-    svg_model = _load_model()
-    response = svg_model.chat(MESSAGES, tools=TOOLS, get_function_by_name=get_function_by_name)
-    print(json.dumps(response, indent=2))
+    from qwen_agent.llm import get_chat_model
+
+    llm = get_chat_model({
+        "model": "Qwen/Qwen3-8B",
+        "model_server": "http://localhost:8000/v1",
+        "api_key": "EMPTY",
+        "generate_cfg": {
+        "extra_body": {
+            "chat_template_kwargs": {"enable_thinking": False}  # default to True
+        }
+        }
+    })
+    return
+
+if __name__ == "__main__":
+    main()

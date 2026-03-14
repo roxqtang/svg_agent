@@ -1,10 +1,8 @@
 #!/bin/bash
-touch ~/.no_auto_tmux
-cd /workspace/
 set -e
 
 ENV_NAME="svggen"
-PYTHON_VERSION="3.11.3"
+PYTHON_VERSION="3.12"
 
 echo "=== Setting up environment for SVG Glyph Generation ==="
 
@@ -24,14 +22,13 @@ echo ">>> Creating conda environment '${ENV_NAME}' with Python ${PYTHON_VERSION}
 conda create -y -n "${ENV_NAME}" python="${PYTHON_VERSION}"
 eval "$(conda shell.bash hook)"
 conda activate "${ENV_NAME}"
-pip install --upgrade pip
 
 # ---------------------------------------------------------------------------
-# 3. Install PyTorch (CUDA 11.8 – matching system CUDA on Vast.ai)
+# 3. Install PyTorch (CUDA 12.6 – adjust the index-url for your CUDA version)
 #    See https://pytorch.org/get-started/locally/ for other variants.
 # ---------------------------------------------------------------------------
-echo ">>> Installing PyTorch (CUDA 11.8)"
-uv pip install torch==2.5.1+cu118 torchvision==0.20.1+cu118 --index-url https://download.pytorch.org/whl/cu118
+echo ">>> Installing PyTorch (CUDA 12.6)"
+uv pip install torch torchvision --index-url https://download.pytorch.org/whl/cu126
 
 # ---------------------------------------------------------------------------
 # 4. Install transformers from source (Qwen3-VL support requires >= 4.57.0)
@@ -40,39 +37,32 @@ echo ">>> Installing transformers from source"
 uv pip install git+https://github.com/huggingface/transformers
 
 # ---------------------------------------------------------------------------
-# 5. Install Qwen3-VL
+# 5. Install Qwen3-VL and core ML dependencies
 # ---------------------------------------------------------------------------
 echo ">>> Installing Qwen3-VL and core ML packages"
-uv pip install -U qwen-agent
-
-# ---------------------------------------------------------------------------
-# 6. Install vLLM (for training & inference)
-# ---------------------------------------------------------------------------
-echo ">>> Installing vLLM"
-uv pip install -U vllm
-
-# ---------------------------------------------------------------------------
-# 7. Install  Other ML core package
-# ---------------------------------------------------------------------------
-
 uv pip install \
     accelerate \
-    qwen-vl-utils==0.0.14 \
+    qwen-vl-utils \
     pillow \
     requests \
     sentencepiece \
     protobuf==6.31.1
 
 # ---------------------------------------------------------------------------
-# 8. Install StarVector model 
+# 6. Install StarVector model 
 # ---------------------------------------------------------------------------
 cd ./star-vector
-uv pip install meson-python meson ninja
-apt-get update && apt-get install -y libcairo2-dev pkg-config
-uv pip install flash-attn==2.7.3 --no-build-isolation
-uv pip install -e . --no-build-isolation
+uv pip install -e .[torch,transformers]
 
 cd ..
+
+# ---------------------------------------------------------------------------
+# 7. Install LLamaFactory + vLLM (for training & inference)
+# ---------------------------------------------------------------------------
+echo ">>> Installing LLamaFactory and vLLM"
+uv pip install 'llamafactory[torch,metrics,deepspeed,vllm]==0.9.3' vllm==0.8.5.post1
+uv pip install --no-cache-dir flash-attn==2.7.2.post1 --no-build-isolation
+
 
 # ---------------------------------------------------------------------------
 # 9. Quick sanity check
