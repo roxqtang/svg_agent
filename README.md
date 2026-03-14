@@ -24,39 +24,30 @@
 
 ## 环境准备
 
-### 1. 安装依赖
+### 快速安装 (推荐)
 
 ```bash
-pip install qwen-agent openai vllm
+bash setup_svggen.sh
 ```
 
-### 2. 初始化子模块
+该脚本会自动完成以下操作:
+
+1. 修复 `libstdc++` (`CXXABI_1.3.15`) 兼容性问题
+2. 安装 `uv` 包管理器
+3. 创建 conda 环境 `svggen` (Python 3.11.3)
+4. 安装 vLLM (>= 0.11)、qwen-vl-utils、qwen-agent 等依赖
+
+### 手动安装
 
 ```bash
-cd svg_agent
-git submodule update --init --recursive
-```
+# 修复 libstdc++ (vast.ai 等环境需要)
+export LD_LIBRARY_PATH=/opt/miniforge3/lib:${LD_LIBRARY_PATH:-}
 
-### 3. 下载模型
-
-```bash
-pip install -U huggingface_hub
-
-# 主 Agent 模型
-huggingface-cli download Qwen/Qwen2.5-VL-7B-Instruct \
-    --local-dir saves/Qwen2.5-VL-7B-Instruct
-
-# VecGlypher 微调模型 (27B, ~54GB 显存)
-huggingface-cli download VecGlypher/VecGlypher-27b-it \
-    --local-dir VecGlypher/saves/VecGlypher-27b-it
-```
-
-如果显存不足 (< 60GB)，可以下载基础模型自行微调:
-
-```bash
-# 小模型基座 (4B, ~10GB 显存)
-huggingface-cli download Qwen/Qwen3-4B \
-    --local-dir VecGlypher/saves/Qwen/Qwen3-4B
+# 安装依赖
+uv pip install -U vllm
+uv pip install qwen-vl-utils==0.0.14
+uv pip install -U "qwen-agent[gui,rag,code_interpreter,mcp]"
+uv pip install soundfile
 ```
 
 ## 运行步骤
@@ -64,7 +55,11 @@ huggingface-cli download Qwen/Qwen3-4B \
 ### Step 1: 启动主 Agent 模型 (终端 1)
 
 ```bash
-vllm serve saves/Qwen2.5-VL-7B-Instruct --port 8000
+vllm serve Qwen/Qwen3-VL-8B-Thinking \
+  --async-scheduling \
+  --host 0.0.0.0 \
+  --port 8000 \
+  --max-model-len 8000
 ```
 
 等待出现 `Uvicorn running on http://0.0.0.0:8000` 后继续。
