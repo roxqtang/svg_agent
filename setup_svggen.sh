@@ -49,28 +49,12 @@ uv pip install \
     protobuf==6.31.1
 
 # ---------------------------------------------------------------------------
-# 6. Install VecGlypher dependencies
+# 6. Install StarVector model 
 # ---------------------------------------------------------------------------
-echo ">>> Installing VecGlypher dependencies"
-uv pip install \
-    blackrenderer==0.6.0 \
-    cairosvg==2.8.2 \
-    click==8.2.1 \
-    tqdm==4.67.1 \
-    ipython==8.37.0 \
-    wordfreq==3.1.1 \
-    pandas==2.3.1 \
-    streamlit==1.47.0 \
-    skia-python==138.0 \
-    svgpathtools==1.7.1 \
-    hydra-core==1.3.2 \
-    seaborn==0.13.2 \
-    matplotlib==3.10.5 \
-    lxml==6.0.1 \
-    tensorboardX==2.6.4 \
-    opencv-python-headless==4.11.0.86 \
-    svg-path==7.0 \
-    orjson==3.11.3
+cd ./star-vector
+uv pip install -e .[torch,transformers]
+
+cd ..
 
 # ---------------------------------------------------------------------------
 # 7. Install LLamaFactory + vLLM (for training & inference)
@@ -79,11 +63,6 @@ echo ">>> Installing LLamaFactory and vLLM"
 uv pip install 'llamafactory[torch,metrics,deepspeed,vllm]==0.9.3' vllm==0.8.5.post1
 uv pip install --no-cache-dir flash-attn==2.7.2.post1 --no-build-isolation
 
-# ---------------------------------------------------------------------------
-# 8. Install evaluation dependencies
-# ---------------------------------------------------------------------------
-echo ">>> Installing evaluation packages"
-uv pip install torchmetrics==1.8.1 openai-clip==1.0.1 lpips==0.1.4
 
 # ---------------------------------------------------------------------------
 # 9. Quick sanity check
@@ -100,7 +79,6 @@ try:
     import svgpathtools, cairosvg, lxml
     print(f"  svgpathtools : {svgpathtools.__version__}")
     print(f"  cairosvg     : {cairosvg.__version__}")
-    print("  VecGlypher deps: OK")
 except ImportError as e:
     print(f"  WARNING: missing VecGlypher dep: {e}")
 
