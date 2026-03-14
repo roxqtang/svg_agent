@@ -48,21 +48,23 @@ uv pip install \
     sentencepiece \
     protobuf==6.31.1
 
-# ---------------------------------------------------------------------------
-# 6. Install StarVector model 
-# ---------------------------------------------------------------------------
-cd ./star-vector
-uv pip install -e .[torch,transformers]
 
-cd ..
 
 # ---------------------------------------------------------------------------
 # 7. Install LLamaFactory + vLLM (for training & inference)
 # ---------------------------------------------------------------------------
 echo ">>> Installing LLamaFactory and vLLM"
 uv pip install 'llamafactory[torch,metrics,deepspeed,vllm]==0.9.3' vllm==0.8.5.post1
+uv pip install -U qwen-agent
 uv pip install --no-cache-dir flash-attn==2.7.2.post1 --no-build-isolation
 
+# ---------------------------------------------------------------------------
+# 6. Install StarVector model 
+# ---------------------------------------------------------------------------
+cd star-vector/
+uv pip install -e .[torch,transformers]
+
+cd ..
 
 # ---------------------------------------------------------------------------
 # 9. Quick sanity check

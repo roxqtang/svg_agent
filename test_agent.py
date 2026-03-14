@@ -118,3 +118,6 @@ for responses in llm.chat(
 ):
     pass
 messages.extend(responses)
+print("=== Responses ===")
+for r in responses:
+    print(r)
