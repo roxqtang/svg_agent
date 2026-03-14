@@ -3,3 +3,4 @@
 	url = https://github.com/QwenLM/Qwen-Agent.git
 [submodule "star-vector"]
 	path = star-vector
+	url = https://github.com/joanrod/star-vector.git
