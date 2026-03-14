@@ -91,7 +91,7 @@ def main():
     from qwen_agent.llm import get_chat_model
 
     llm = get_chat_model({
-        "model": "Qwen/Qwen3-8B",
+        "model": "Qwen/Qwen3-VL-8B-Instruct",
         "model_server": "http://localhost:8000/v1",
         "api_key": "EMPTY",
         "generate_cfg": {
@@ -100,6 +100,19 @@ def main():
         }
         }
     })
+
+    messages = MESSAGES[:]
+    functions = [tool["function"] for tool in TOOLS]
+
+    for responses in llm.chat(
+        messages=messages,
+        functions=functions,
+    ):
+        pass
+    messages.extend(responses)
+    print("=== Responses ===")
+    for r in responses:
+        print(r)
     return
 
 if __name__ == "__main__":

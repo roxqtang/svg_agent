@@ -99,7 +99,7 @@ MESSAGES = [
 from qwen_agent.llm import get_chat_model
 
 llm = get_chat_model({
-    "model": "Qwen/Qwen3-8B",
+    "model": "Qwen/Qwen3-VL-8B-Thinking",
     "model_server": "http://localhost:8000/v1",
     "api_key": "EMPTY",
     "generate_cfg": {
