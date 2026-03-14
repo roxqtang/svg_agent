@@ -1,13 +1,19 @@
 import json
 import torch
 from PIL import Image
-from transformers import AutoModelForCausalLM
+from transformers import Qwen3VLForConditionalGeneration, AutoProcessor, AutoModelForCausalLM
 from starvector.data.util import process_and_rasterize_svg
-
+from qwen_agent.llm import get_chat_model
 
 # ── StarVector model (lazy‑loaded singleton) ──────────────────────────
 _starvector = None
 
+def _load_main_model(model_name: str = "Qwen/Qwen3-VL-8B-Thinking"):
+    main_model = Qwen3VLForConditionalGeneration.from_pretrained(
+    "Qwen/Qwen3-VL-8B-Thinking", dtype="auto", device_map="auto"
+)
+    
+    
 def _load_model(model_name: str = "starvector/starvector-8b-im2svg"):
     global _starvector
     if _starvector is None:
@@ -80,3 +86,9 @@ TOOLS = [
 MESSAGES = [
     {"role": "user", "content": "Please convert the image at 'assets/examples/sample-18.png' into SVG."},
 ]
+
+def main():
+    main_model = _load_main_model()
+    svg_model = _load_model()
+    response = svg_model.chat(MESSAGES, tools=TOOLS, get_function_by_name=get_function_by_name)
+    print(json.dumps(response, indent=2))

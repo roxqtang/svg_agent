@@ -4,7 +4,7 @@ cd /workspace/
 set -e
 
 ENV_NAME="svggen"
-PYTHON_VERSION="3.12"
+PYTHON_VERSION="3.11.3"
 
 echo "=== Setting up environment for SVG Glyph Generation ==="
 
@@ -24,13 +24,14 @@ echo ">>> Creating conda environment '${ENV_NAME}' with Python ${PYTHON_VERSION}
 conda create -y -n "${ENV_NAME}" python="${PYTHON_VERSION}"
 eval "$(conda shell.bash hook)"
 conda activate "${ENV_NAME}"
+pip install --upgrade pip
 
 # ---------------------------------------------------------------------------
-# 3. Install PyTorch (CUDA 12.6 – adjust the index-url for your CUDA version)
+# 3. Install PyTorch (CUDA 11.8 – matching system CUDA on Vast.ai)
 #    See https://pytorch.org/get-started/locally/ for other variants.
 # ---------------------------------------------------------------------------
-echo ">>> Installing PyTorch (CUDA 12.6)"
-uv pip install torch torchvision --index-url https://download.pytorch.org/whl/cu126
+echo ">>> Installing PyTorch (CUDA 11.8)"
+uv pip install torch==2.5.1+cu118 torchvision==0.20.1+cu118 --index-url https://download.pytorch.org/whl/cu118
 
 # ---------------------------------------------------------------------------
 # 4. Install transformers from source (Qwen3-VL support requires >= 4.57.0)
@@ -66,7 +67,10 @@ uv pip install \
 # 8. Install StarVector model 
 # ---------------------------------------------------------------------------
 cd ./star-vector
-pip install -e .[torch,transformers]
+uv pip install meson-python meson ninja
+apt-get update && apt-get install -y libcairo2-dev pkg-config
+uv pip install flash-attn==2.7.3 --no-build-isolation
+uv pip install -e . --no-build-isolation
 
 cd ..
 
