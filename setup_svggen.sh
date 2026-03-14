@@ -1,4 +1,6 @@
 #!/bin/bash
+touch ~/.no_auto_tmux
+cd /workspace/
 set -e
 
 ENV_NAME="svggen"
@@ -37,32 +39,36 @@ echo ">>> Installing transformers from source"
 uv pip install git+https://github.com/huggingface/transformers
 
 # ---------------------------------------------------------------------------
-# 5. Install Qwen3-VL and core ML dependencies
+# 5. Install Qwen3-VL
 # ---------------------------------------------------------------------------
 echo ">>> Installing Qwen3-VL and core ML packages"
+uv pip install -U qwen-agent
+
+# ---------------------------------------------------------------------------
+# 6. Install vLLM (for training & inference)
+# ---------------------------------------------------------------------------
+echo ">>> Installing vLLM"
+uv pip install -U vllm
+
+# ---------------------------------------------------------------------------
+# 7. Install  Other ML core package
+# ---------------------------------------------------------------------------
+
 uv pip install \
     accelerate \
-    qwen-vl-utils \
+    qwen-vl-utils==0.0.14 \
     pillow \
     requests \
     sentencepiece \
     protobuf==6.31.1
 
 # ---------------------------------------------------------------------------
-# 6. Install StarVector model 
+# 8. Install StarVector model 
 # ---------------------------------------------------------------------------
 cd ./star-vector
-uv pip install -e .[torch,transformers]
+pip install -e .[torch,transformers]
 
 cd ..
-
-# ---------------------------------------------------------------------------
-# 7. Install LLamaFactory + vLLM (for training & inference)
-# ---------------------------------------------------------------------------
-echo ">>> Installing LLamaFactory and vLLM"
-uv pip install 'llamafactory[torch,metrics,deepspeed,vllm]==0.9.3' vllm==0.8.5.post1
-uv pip install --no-cache-dir flash-attn==2.7.2.post1 --no-build-isolation
-
 
 # ---------------------------------------------------------------------------
 # 9. Quick sanity check
