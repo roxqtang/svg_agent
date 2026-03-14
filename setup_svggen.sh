@@ -35,6 +35,8 @@ echo ">>> Installing vLLM and dependencies"
 uv pip install -U vllm
 uv pip install qwen-vl-utils==0.0.14
 uv pip install -U "qwen-agent[gui,rag,code_interpreter,mcp]"
+uv pip install soundfile
+
 
 echo "=== Setup complete ==="
 echo "To start vLLM server, run:"
